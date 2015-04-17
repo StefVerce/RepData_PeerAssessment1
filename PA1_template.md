@@ -17,28 +17,6 @@ library(plyr)
 library(dplyr)
 ```
 
-```
-## Warning: package 'dplyr' was built under R version 3.1.2
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-## 
-## The following objects are masked from 'package:plyr':
-## 
-##     arrange, count, desc, failwith, id, mutate, rename, summarise,
-##     summarize
-## 
-## The following object is masked from 'package:stats':
-## 
-##     filter
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
 ### Setting global options
 
 ```r
@@ -154,8 +132,7 @@ plot(int_df$interval
 
 ## 4. Imputing missing values
 
-
-Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
+The presence of missing days may introduce bias into some calculations or summaries of the data.
 
 Total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
@@ -168,9 +145,8 @@ sum(is.na(df$steps))
 ## [1] 2304
 ```
 
-There're 2304 missing values out of 17568 records. This represents roughly 
-13% which is quite significant.
-
+There're **2304** missing values out of **17568** records. This represents roughly 
+**13%** which is quite significant.
 
 
 
@@ -189,7 +165,40 @@ Make a histogram of the total number of steps taken each day and Calculate and r
 
 
 
-
-
-
 ## 5. Are there differences in activity patterns between weekdays and weekends?
+
+1. Adding a new factor variable to the dataset
+   - "weekday" 
+   - "weekend"
+   
+
+```r
+df$weekday <- as.factor(sapply(df$date,function(x) ifelse(!(weekdays(as.Date(x)) %in% c('Saturday','Sunday')),"weekday","weekend")))
+```
+
+2. Activity patterns between weekdays and weekends
+
+   First we compute the mean nb. of steps per interval and weekday type:
+
+```r
+df_day <- aggregate(steps ~ interval + weekday, data=df, mean)
+```
+
+   Then we draw a panel plot to represent data:
+
+```r
+library(lattice)
+xyplot(
+  steps ~ interval | weekday,
+  df_day,
+  type = "l",
+  layout = c(1,2),
+  main = "Activity patterns between weekdays and weekends",
+  xlab = "Interval",
+  ylab = "Number of steps"
+)
+```
+
+![plot of chunk plot_activity](figure/plot_activity-1.png) 
+   
+   

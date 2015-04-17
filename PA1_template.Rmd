@@ -87,19 +87,19 @@ plot(int_df$interval
     ,main = "Average daily activity pattern")
  # draw a vertical line to highlight the interval having the highest mean nb of steps
  int_max <- int_df[int_df$mean_steps==max(int_df$mean_steps),]
- abline(v=int_max$interval, col="red")
- axis(1, at=int_max$interval,labels=int_max$interval)
+ int_max_interval <- int_max$interval
+ abline(v=int_max_interval, col="red")
+ axis(1, at=int_max_interval,labels=int_max_interval)
 ```
 
 
-=> The 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps
-is **`r int_max$interval`** with a total of **`r round(int_max$mean_steps)`**.
+=> The 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps is r int_max$interval with a total of r round(int_max$mean_steps).
+
 
 
 ## 4. Imputing missing values
 
-
-Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
+The presence of missing days may introduce bias into some calculations or summaries of the data.
 
 Total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
@@ -107,9 +107,8 @@ Total number of missing values in the dataset (i.e. the total number of rows wit
 sum(is.na(df$steps))
 ```
 
-There're `r sum(is.na(df$steps))` missing values out of `r nrow(df)` records. This represents roughly 
-`r round(100*sum(is.na(df$steps))/nrow(df))`% which is quite significant.
-
+There're **`r sum(is.na(df$steps))`** missing values out of **`r nrow(df)`** records. This represents roughly 
+**`r round(100*sum(is.na(df$steps))/nrow(df))`%** which is quite significant.
 
 
 
@@ -128,7 +127,35 @@ Make a histogram of the total number of steps taken each day and Calculate and r
 
 
 
-
-
-
 ## 5. Are there differences in activity patterns between weekdays and weekends?
+
+1. Adding a new factor variable to the dataset
+   - "weekday" 
+   - "weekend"
+   
+```{r adding_weekday }
+df$weekday <- as.factor(sapply(df$date,function(x) ifelse(!(weekdays(as.Date(x)) %in% c('Saturday','Sunday')),"weekday","weekend")))
+```
+
+2. Activity patterns between weekdays and weekends
+
+   First we compute the mean nb. of steps per interval and weekday type:
+```{r computing_mean }
+df_day <- aggregate(steps ~ interval + weekday, data=df, mean)
+```
+
+   Then we draw a panel plot to represent data:
+```{r plot_activity }   
+library(lattice)
+xyplot(
+  steps ~ interval | weekday,
+  df_day,
+  type = "l",
+  layout = c(1,2),
+  main = "Activity patterns between weekdays and weekends",
+  xlab = "Interval",
+  ylab = "Number of steps"
+)
+```   
+   
+   
