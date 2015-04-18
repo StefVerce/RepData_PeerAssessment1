@@ -1,7 +1,7 @@
 Reproducible Research: Peer Assessment 1
 ========================================
 Coursera - S.Vercellotti - April 2015
-date: "2015-04-17"
+date: "2015-04-18"
 
 output: 
   html_document:
@@ -119,6 +119,7 @@ plot(int_df$interval
  # draw a vertical line to highlight the interval having the highest mean nb of steps
  int_max <- int_df[int_df$mean_steps==max(int_df$mean_steps),]
  int_max_interval <- int_max$interval
+ int_max_steps    <- int_max$mean_steps
  abline(v=int_max_interval, col="red")
  axis(1, at=int_max_interval,labels=int_max_interval)
 ```
@@ -126,7 +127,7 @@ plot(int_df$interval
 ![plot of chunk plot_time_series](figure/plot_time_series-1.png) 
 
 
-=> The 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps is r int_max$interval with a total of r round(int_max$mean_steps).
+=> The 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps is **835** with a total of **206** steps.
 
 
 
@@ -149,18 +150,73 @@ There're **2304** missing values out of **17568** records. This represents rough
 **13%** which is quite significant.
 
 
+Defining a strategy for filling in all of the missing values in the dataset. 
 
-Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+```r
+qplot(interval,steps, data = df, na.rm=TRUE)
+```
+
+![plot of chunk ploting_as_is](figure/ploting_as_is-1.png) 
+
+
+```r
+# Add weekday to the core data frame
+df$weekday <- weekdays(as.Date(df$date))
+qplot(interval,steps, data = df, facets = . ~ weekday,na.rm=TRUE)
+```
+
+![plot of chunk ploting_per_day](figure/ploting_per_day-1.png) 
+
+One option to fill in missing observations could be to compte the mean number of steps per interval on a weekday basis as the above patterns seems to differ from one day to another. This hypothesis seems to make sense rather than computing the mean across all days. 
 
 Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
+This section gets the mean nb of steps per interval per day, and merge the dataframes in order
+to replace NAs with the mean values as default values 
+
+```r
+df_day <- aggregate(steps ~ interval + weekday, data=df, mean, na.rm = TRUE)
+df_day$steps <- round(df_day$step,0)
+colnames(df_day)[colnames(df_day)=="steps"] <- "default_steps"
+df_filled <- merge(df,df_day,by=c("interval","weekday"))
+df_filled$steps <- ifelse(is.na(df_filled$steps),df_filled$default_steps, df_filled$steps)
+```
+
+```r
+agg_df_filled <- aggregate(steps ~ date,df_filled,sum)
+```
 
 
+```r
+g <- ggplot(agg_df_filled, aes(x=steps)) + geom_histogram(binwidth=500)
+g <- g + labs(title = "Total number of steps taken each day (no missing values)", x = "Nb of steps", y ="Frequency")
+print(g)
+```
 
+![plot of chunk ploting_histogram_filled](figure/ploting_histogram_filled-1.png) 
 
+Mean of the total of steps taken each day:
 
+```r
+mean(agg_df_filled$steps)
+```
 
-Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+```
+## [1] 10821.1
+```
+
+Median of the total of steps taken each day:
+
+```r
+median(agg_df_filled$steps)
+```
+
+```
+## [1] 11015
+```
+
+These values differs from the estimate in question 1  
 
 
 
