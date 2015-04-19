@@ -1,8 +1,8 @@
 Reproducible Research: Peer Assessment 1
 ========================================
-Coursera - S.Vercellotti - April 2015
+Coursera - Stephane Vercellotti
 
-generation date: "`r Sys.Date()`"
+Report generation date: "`r Sys.Date()`"
 
 output: 
   html_document:
@@ -10,7 +10,7 @@ output:
     
     
 ### loading libraries
-```{r}
+```{r, message=F, warning=F}
 library(knitr)
 library(ggplot2)
 library(plyr)
@@ -66,13 +66,13 @@ median(agg_df$steps)
 
 
 
-The mean `r round(mean(agg_df$steps),2)` and the median `r round(median(agg_df$steps),2)` are close to each other (*These values are highlighted on the above histogram as coloured lines*).
+The mean **`r round(mean(agg_df$steps),2)`** and the median **`r round(median(agg_df$steps),2)`** are close to each other (*These values are highlighted on the above histogram as coloured lines*).
 
 
 
 ## 3. What is the average daily activity pattern?
 
-Let's now group the dataframe across all intervals and get the mean steps values (*dataframe column name is "mean_steps"):
+Let's now group the dataframe across all intervals and get the mean steps values (*dataframe column name is "mean_steps"*):
 ```{r grouping_interval}
 int_df  <- df %>% 
               group_by(interval) %>% 
@@ -114,7 +114,7 @@ There're **`r sum(is.na(df$steps))`** missing values out of **`r nrow(df)`** rec
 **`r round(100*sum(is.na(df$steps))/nrow(df))`%** which is quite significant.
 
 
-Defining a strategy for filling in all of the missing values in the dataset. 
+###Devising a strategy for filling in all of the missing values in the dataset. 
 
 ```{r ploting_as_is}
 qplot(interval,steps, data = df, na.rm=TRUE)
@@ -126,9 +126,9 @@ df$weekday <- weekdays(as.Date(df$date))
 qplot(interval,steps, data = df, facets = . ~ weekday,na.rm=TRUE)
 ```
 
-One option to fill in missing observations could be to compte the mean number of steps per interval on a weekday basis as the above patterns seems to differ from one day to another. This hypothesis seems to make sense rather than computing the mean across all days. 
+One option to fill in missing observations could be to compute the mean number of steps per interval on a weekday basis as the above patterns seems to differ from one day to another. This hypothesis seems to make sense rather than computing the mean across all days. 
 
-Create a new dataset that is equal to the original dataset but with the missing data filled in.
+###Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
 This section gets the mean nb of steps per interval per day, and merge the dataframes in order
 to replace NAs with the mean values as default values 
@@ -140,14 +140,14 @@ df_filled <- merge(df,df_day,by=c("interval","weekday"))
 df_filled$steps <- ifelse(is.na(df_filled$steps),df_filled$default_steps, df_filled$steps)
 ```
 
-Grouping by day:
+Grouping by date:
 ```{r agg_df_filled}
 agg_df_filled <- aggregate(steps ~ date,df_filled,sum)
 ```
 
 ```{r ploting_histogram_filled}
 g <- ggplot(agg_df_filled, aes(x=steps)) + geom_histogram(binwidth=500)
-g <- g + labs(title = "Total number of steps taken each day (no missing values)", x = "Nb of steps", y ="Frequency")
+g <- g + labs(title = "Total number of steps taken each day (incl.default missing values)", x = "Nb of steps", y ="Frequency")
 print(g)
 ```
 

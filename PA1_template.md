@@ -1,7 +1,8 @@
 Reproducible Research: Peer Assessment 1
 ========================================
-Coursera - S.Vercellotti - April 2015
-date: "2015-04-18"
+Coursera - Stephane Vercellotti
+
+Report generation date: "2015-04-19"
 
 output: 
   html_document:
@@ -93,13 +94,14 @@ median(agg_df$steps)
 ```
 
 
-The mean 10766.19 and the median 10765 are close to each other (*These values are highlighted on the above histogram*).
+
+The mean **10766.19** and the median **10765** are close to each other (*These values are highlighted on the above histogram as coloured lines*).
 
 
 
 ## 3. What is the average daily activity pattern?
 
-Let's now group the dataframe across all intervals and get the mean steps values (*dataframe column name is "mean_steps"):
+Let's now group the dataframe across all intervals and get the mean steps values (*dataframe column name is "mean_steps"*):
 
 ```r
 int_df  <- df %>% 
@@ -150,7 +152,7 @@ There're **2304** missing values out of **17568** records. This represents rough
 **13%** which is quite significant.
 
 
-Defining a strategy for filling in all of the missing values in the dataset. 
+###Devising a strategy for filling in all of the missing values in the dataset. 
 
 
 ```r
@@ -168,9 +170,9 @@ qplot(interval,steps, data = df, facets = . ~ weekday,na.rm=TRUE)
 
 ![plot of chunk ploting_per_day](figure/ploting_per_day-1.png) 
 
-One option to fill in missing observations could be to compte the mean number of steps per interval on a weekday basis as the above patterns seems to differ from one day to another. This hypothesis seems to make sense rather than computing the mean across all days. 
+One option to fill in missing observations could be to compute the mean number of steps per interval on a weekday basis as the above patterns seems to differ from one day to another. This hypothesis seems to make sense rather than computing the mean across all days. 
 
-Create a new dataset that is equal to the original dataset but with the missing data filled in.
+###Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
 This section gets the mean nb of steps per interval per day, and merge the dataframes in order
 to replace NAs with the mean values as default values 
@@ -183,6 +185,8 @@ df_filled <- merge(df,df_day,by=c("interval","weekday"))
 df_filled$steps <- ifelse(is.na(df_filled$steps),df_filled$default_steps, df_filled$steps)
 ```
 
+Grouping by date:
+
 ```r
 agg_df_filled <- aggregate(steps ~ date,df_filled,sum)
 ```
@@ -190,7 +194,7 @@ agg_df_filled <- aggregate(steps ~ date,df_filled,sum)
 
 ```r
 g <- ggplot(agg_df_filled, aes(x=steps)) + geom_histogram(binwidth=500)
-g <- g + labs(title = "Total number of steps taken each day (no missing values)", x = "Nb of steps", y ="Frequency")
+g <- g + labs(title = "Total number of steps taken each day (incl.default missing values)", x = "Nb of steps", y ="Frequency")
 print(g)
 ```
 
@@ -216,7 +220,7 @@ median(agg_df_filled$steps)
 ## [1] 11015
 ```
 
-These values differs from the estimate in question 1  
+These values differs from the estimate in question 1.  
 
 
 
